@@ -19,6 +19,7 @@ class _RegisterviewState extends State<RegisterView> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController genderController = TextEditingController();
   TextEditingController dateController = TextEditingController();
   bool isPasswordVisible = false;
   DateTime selectedDate = DateTime.now();
@@ -70,8 +71,14 @@ class _RegisterviewState extends State<RegisterView> {
                           prefixIcon: Icon(Icons.person),
                           labelText: 'Username',
                         ),
-                        validator: (value) =>
-                            value == '' ? 'Please enter your username' : null,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter your username';
+                          } else if (value.length < 4 ) {
+                            return 'Username minimal 4 huruf';
+                          }
+                          return null;
+                        }
                       ),
                       TextFormField(
                           controller: emailController,
@@ -109,8 +116,29 @@ class _RegisterviewState extends State<RegisterView> {
                           ),
                         ),
                         obscureText: !state.isPasswordVisible,
-                        validator: (value) =>
-                            value == '' ? 'Please enter your password' : null,
+                        validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter your password';
+                            } else if (value.length < 5) {
+                              return 'Password minimal 5 huruf';
+                            }
+                            return null;
+                          }
+                      ),
+                      TextFormField(
+                        controller: genderController,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.transgender),
+                          labelText: 'Gender',
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter your gender';
+                          } else if (value != "L" && value != "P") {
+                            return 'Gender harus diisi dengan L atau P';
+                          }
+                          return null;
+                        }
                       ),
                       TextFormField(
                         keyboardType:
@@ -119,9 +147,14 @@ class _RegisterviewState extends State<RegisterView> {
                           prefixIcon: Icon(Icons.phone),
                           labelText: 'Phone Number',
                         ),
-                        validator: (value) => value!.isEmpty
-                            ? 'Please enter your phone number'
-                            : null,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter your phone number';
+                          } else if (value.length != 12) {
+                            return 'Phone number must have exactly 12 digits';
+                          }
+                          return null;
+                        },
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                         ],
@@ -151,13 +184,24 @@ class _RegisterviewState extends State<RegisterView> {
                           );
 
                           if (pickedDate != null) {
-                            selectedDate = pickedDate;
-                            dateController.text =
-                                selectedDate.toLocal().toString().split(' ')[0];
+                            if (pickedDate.isAfter(DateTime.now())) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Born Date cannot be in the future.'),
+                                ),
+                              );
+                            } else {
+                              selectedDate = pickedDate;
+                              dateController.text = selectedDate.toLocal().toString().split(' ')[0];
+                            }
                           }
                         },
-                        validator: (value) =>
-                            value == '' ? 'Please enter your born date' : null,
+                        validator: (value) {
+                          if (value == '') {
+                            return 'Please enter your born date';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 30),
                       SizedBox(
@@ -170,6 +214,7 @@ class _RegisterviewState extends State<RegisterView> {
                                       username: usernameController.text,
                                       email: emailController.text,
                                       password: passwordController.text,
+                                      gender: genderController.text,
                                       noTelpon: 0,
                                       selectedDate: DateTime.now(),
                                     ),
